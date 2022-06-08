@@ -1,0 +1,40 @@
+<%- include("partials/header") %>
+
+<h1>Home</h1>
+    
+<p> <%= startingContent %> </p>
+    
+<% if(posts.length) { %> 
+    <% for(var i=0; i<posts.length;i++) { %>
+        <p><%=i+1%> </p>
+
+        <p><%=posts[i].content.substring(0, 100) + "..."%></p>
+        <a href="/posts/<%=posts[i]._id%>">Read More</a>
+        <hr>
+        <% } %>
+        <% } %>
+
+
+        <nav>
+            <ul class="pagination">
+            <li class="page-item"><a class="page-link" href="/posts/1<%=posts%>">First</a></li>
+            <li class="page-item">
+                <% if(currentPage > 1){ %> 
+            <% var a = parseInt(curentpage)-1 %>
+            <a class="page-link" href="/<%=a%>-">Previous</a>
+            
+            <% } %>
+            </li>
+           
+            
+            <% if(currentPage < lastPage) { %> 
+            <% var b = parseInt(currentPage)+1 %>
+            %>
+            <a class="page-link" href="/<%=b%>-">Next</a>
+            <% } %>
+            
+            <li class="page-item"><a class="page-link" href="/<%=b%>-">Last</a></li>
+            </ul>
+            </nav>
+
+<%- include("partials/footer") %>
