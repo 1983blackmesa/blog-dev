@@ -112,84 +112,50 @@ const postSchema = {
 
   const Post = mongoose.model("Post", postSchema); //Blog Model
   
+ 
+  app.get("/", function(req, res) {
 
-
-  /*
-  
-    var perPage = 3;
-      var page = req.params.page || 1;
-  
-    Post.find({})
-             .skip((perPage * page) - perPage)
-             .limit(perPage).exec(function(err,posts){
-                  if(err) throw err;
-            Post.countDocuments({}).exec((err,count)=>{          
-            res.render('home', { startingContent: homeStartingContent,
-                        //posts: posts,        
-                        posts: posts,
-                        current: page,
-                        pages: Math.ceil(count / perPage) });
-    
-  });
-    });
-    
-  });
-
-  app.get('/:page', function(req, res, next) {
-    var perPage = 3;
-      var page = req.params.page || 1;
-  
-    Post.find({})
-             .skip((perPage * page) - perPage)
-             .limit(perPage).exec(function(err,posts){
-                  if(err) throw err;
-            Post.countDocuments({}).exec((err,count)=>{          
-    res.render('home', { startingContent: homeStartingContent,
-                    //posts: posts,
-                    posts: posts,
-                    current: page,
-                    pages: Math.ceil(count / perPage) });
-    
-  });
-    });
-    
-  });
-*/
-
-  
-  
-
-app.get('/', function(req, res) {
-    let currentPage = req.query.page || 1;
-    let perPage = 4; //restart the server when change is made
-    let totalItems;
-    const lastPage = Math.ceil(totalItems / perPage);
-
-    Post.find()
-        .countDocuments()
-         .then(count => {
-            totalItems = count;
-            Post.find()
-              .skip((currentPage - 1) * perPage)
-              .limit(perPage)
-              .then(posts => {
-                  res.render("home", {
+  var perPage = 4
+    var page = req.params.page || 1
+ 
+    Post
+        .find({})
+        .skip((perPage * page) - perPage)
+        .limit(perPage)
+        .exec(function(err, posts) {
+          Post.count().exec(function(err, count) {
+                if (err) return next(err)
+                res.render('home', {
                     startingContent: homeStartingContent,
                     posts: posts,
-                    totalItems: totalItems,
-                    lastPage: lastPage,
-                    currentPage: currentPage
-                  });
-              });
+                    current: page,
+                    pages: Math.ceil(count / perPage)
+                })
+            })
+        })
+   });
 
-            });
-     });
-        //Post.find({}, function(err, posts) {
-    
-    //res.render("home", { startingContent: homeStartingContent, 
-   //                       posts: posts
-      //});
+app.get("/page/:page", function(req, res, next) {
 
+        var perPage = 4
+          var page = req.params.page || 1
+       
+          Post
+              .find({})
+              .skip((perPage * page) - perPage)
+              .limit(perPage)
+              .exec(function(err, posts) {
+                Post.count().exec(function(err, count) {
+                      if (err) return next(err)
+                      res.render('home', {
+                          startingContent: homeStartingContent,
+                          posts: posts,
+                          current: page,
+                          pages: Math.ceil(count / perPage)
+                      })
+                  })
+              })
+         });
 
       app.get("/auth/google",
       passport.authenticate('google', { scope: ["profile"] })
