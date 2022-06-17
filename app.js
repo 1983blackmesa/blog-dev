@@ -1,4 +1,7 @@
-require('dotenv').config();
+if (process.env.NODE_ENV !== 'production') {
+  require('dotenv').config();
+}
+//require('dotenv').config();
 var express = require('express');
 var path = require('path');
 var cookieParser = require('cookie-parser');
@@ -17,17 +20,31 @@ const findOrCreate = require('mongoose-findorcreate');
 //var indexRouter = require('./routes/index');
 //var usersRouter = require('./routes/users');
 
-const homeStartingContent = "Home";
+const homeStartingContent = "Blogs: ";
 
 const aboutContent = "About";
 const contactContent = "Contact";
-
+const blogsContent = "Blogs";
 
 var app = express();
 
-mongoose.connect("mongodb://localhost:27017/blog2", {useNewUrlParser: true});
+
+// Connect to mongodb
+const URI = process.env.MONGODB_URL;
+mongoose.connect(URI, {
+    //useCreateIndex: true,
+    //useFindAndModify: false,
+    useNewUrlParser: true,
+    useUnifiedTopology: true
+}, err => {
+    if(err) throw err;
+    console.log("Connected to mongodb");
+});
+
+//require('./config/passport');
 //mongoose.set("useCreateIndex", true);
 
+//EJS
 app.set('view engine', 'ejs');
 
 app.use(bodyParser.urlencoded({extended: true}));
@@ -40,8 +57,8 @@ app.use(session({
   }));
 
   
-  app.use(passport.initialize());
-  app.use(passport.session());
+  app.use(passport.initialize()); //This stays in app.js
+  app.use(passport.session()); //This stays in app.js
 
 app.use(logger('dev'));
 app.use(express.json());
@@ -56,8 +73,8 @@ app.use('/tinymce', express.static(path.join(__dirname, 'node_modules', 'tinymce
 
 
 
-const userSchema = new mongoose.Schema ({
-    email: String,
+const userSchema = new mongoose.Schema ({ //user Schema NOT blog
+    username: String,
     password: String,
     googleId: String,
     secret: String
@@ -67,6 +84,8 @@ const userSchema = new mongoose.Schema ({
   userSchema.plugin(findOrCreate);
   
   const User = new mongoose.model("User", userSchema);
+  
+
   
   passport.use(User.createStrategy());
   
@@ -83,7 +102,7 @@ const userSchema = new mongoose.Schema ({
   passport.use(new GoogleStrategy({
       clientID: process.env.CLIENT_ID,
       clientSecret: process.env.CLIENT_SECRET,
-      callbackURL: "http://localhost:3000/auth/google/secrets",
+      callbackURL: "https://www.pushtoprod.dev/auth/google/secrets",
       userProfileURL: "https://www.googleapis.com/oauth2/v3/userinfo"
     },
     function(accessToken, refreshToken, profile, cb) {
@@ -101,7 +120,7 @@ const userSchema = new mongoose.Schema ({
 const postSchema = {
     title: String,
     content: String,
-    username: String,
+    author: String,
     createdAt: {
       type: Date,
       default: new Date()
@@ -112,11 +131,11 @@ const postSchema = {
 
   const Post = mongoose.model("Post", postSchema); //Blog Model
   
- 
-  app.get("/", function(req, res) {
 
-  var perPage = 4
-    var page = req.params.page || 1
+app.get("/", function(req, res) {
+
+  var perPage = 4;
+    var page = req.params.page || 1;
  
     Post
         .find({})
@@ -124,21 +143,21 @@ const postSchema = {
         .limit(perPage)
         .exec(function(err, posts) {
           Post.count().exec(function(err, count) {
-                if (err) return next(err)
+                if (err) return next(err);
                 res.render('home', {
                     startingContent: homeStartingContent,
                     posts: posts,
                     current: page,
                     pages: Math.ceil(count / perPage)
-                })
-            })
-        })
+                });
+            });
+        });
    });
+   
+     app.get("/page/:page", function(req, res, next) {
 
-app.get("/page/:page", function(req, res, next) {
-
-        var perPage = 4
-          var page = req.params.page || 1
+        var perPage = 4;
+          var page = req.params.page || 1;
        
           Post
               .find({})
@@ -146,15 +165,15 @@ app.get("/page/:page", function(req, res, next) {
               .limit(perPage)
               .exec(function(err, posts) {
                 Post.count().exec(function(err, count) {
-                      if (err) return next(err)
+                      if (err) return next(err);
                       res.render('home', {
                           startingContent: homeStartingContent,
                           posts: posts,
                           current: page,
                           pages: Math.ceil(count / perPage)
-                      })
-                  })
-              })
+                      });
+                  });
+              });
          });
 
       app.get("/auth/google",
@@ -168,12 +187,9 @@ app.get("/page/:page", function(req, res, next) {
         res.redirect("/admin");
       });
     
-    app.get("/login", function(req, res){
-      res.render("login");
-    });
-
-  
     
+     
+
 
       app.get("/admin", function(req, res){
         //res.set('Cache-Control', 'no-store'); //not needed
@@ -202,16 +218,18 @@ app.post('/logout', function(req, res, next) {
            res.redirect('/');
       });
   });
+
  
+  
   app.get("/about", function(req, res) {
     res.render("about", { abContent: aboutContent}); //render home page, pass KEY which is startingContent in home.ejs  (KEY VALUE)
   });
   
   app.get("/contact", function(req, res) {
-    res.render("contact", { conContent: contactContent}); //render home page, pass KEY which is startingContent in home.ejs  (KEY VALUE)
+    res.render("contact", { conContent: contactContent}); //render contact page
   });
   
-  app.get("/compose", function(req, res) { //make compose page authenticated for blog usage
+  app.get("/compose", function(req, res) { //make compose page
     if (req.isAuthenticated()){
         res.render("compose");
       } else {
@@ -220,78 +238,207 @@ app.post('/logout', function(req, res, next) {
   });
   
   app.post("/compose", function(req, res) {
-    
-    
-    //const mycontent = tinymce.get("myTextarea").setContent({ format: "text" });
-    
     //create JS object
     const post = new Post({
         
       title: _.lowerCase(req.body.postTitle),
       content: req.body.postBody,
-      //content: tinymce.get("mytextarea").getContent({ format: "text" }).req.body.postBody,
-      username: _.lowerCase(req.body.postUsername)
+      author: _.lowerCase(req.body.postAuthor)
     });
   
     post.save(function(err) {
-    //post.save();
-    //posts.push(post);
       if(!err) {
-    res.redirect("/"); //send user back to home route
+    res.redirect("/admin"); //send user back to home route
       }
   });
   });
   
+//This works, brings all posts from blog
+app.get("/editpost", function(req, res) {
+  if (req.isAuthenticated()){
+    Post
+    .find({})
+    .exec(function (err, posts) {
+      Post.count().exec(function(err, count) {
+        if (err) return next(err)
+      res.render("editpost", { posts: posts} );
+    })
 
-  app.post("/login", function(req, res){
+  })
 
+  } //end if authenticated
+
+  else {
+    res.redirect("/login");
+  }
+});
+
+
+app.get("/editpostID/:postId", function(req, res) { //dynamic site, edit specific post id
+  
+  if (req.isAuthenticated()){
+  const requestedPostId = req.params.postId;
+  
+  Post.findOne({_id: requestedPostId}, function(err, post){
+      
+      res.render("editpostID", {
+      title: post.title,
+      content: post.content,
+      author: post.author,
+      createdAt: post.createdAt
+    });
+  });
+  
+} //end if authenticated
+
+else {
+  res.redirect("/login");
+}
+ 
+});
+
+//save specfic post id after new change
+app.post("/do-edit-post", function(req, res) {
+	console.log(req.body);
+  const requestedPostId = req.params.postId;
+  Post.updateOne(
+    {
+      _id: requestedPostId, $set: {
+        title: req.body.postTitle,
+        author: req.body.postAuthor,
+        conent: req.body.postBody
+      },
+      
+    });
+    res.render("editpost");
+  //Post.findOneAndUpdate({ _id: requestedPostId }, {$set:{content:post.content}}, { overwrite: true }, function(err) {
+    //if (err) return next(err);
+    //res.redirect("editpost");
+});
+  
+  
+  //const id = req.params.id;
+  //req.params.id
+  
+  /*
+  Post.findOneAndUpdate({_id: requestedPostId}, function(res, post) {
+    {$set: {title: post.title}, {author: post.author}, {content: post.content}}
+
+    res.redirect("/editpost", {
+      title: post.title,
+      content: post.content,
+      author: post.author,
+      createdAt: post.createdAt
+    });
+
+  */
+//}); //end function
+
+
+/*
+app.get("/register", function(req, res) {
+  res.render("register");
+});
+*/
+
+  
+  app.get("/login", function(req, res){
+    res.render("login");
+  });
+  
+  
+  app.get("/blogs", function(req, res) {
+
+  var perPage = 4;
+    var page = req.params.page || 1;
+ 
+    Post
+        .find({})
+        .skip((perPage * page) - perPage)
+        .limit(perPage)
+        .exec(function(err, posts) {
+          Post.count().exec(function(err, count) {
+                if (err) return next(err);
+                res.render("blogs", {
+                    myblogs: blogsContent,
+                    posts: posts,
+                    current: page,
+                    pages: Math.ceil(count / perPage)
+                });
+            });
+        });
+   });
+
+/*
+  app.post("/register", function(req, res) {
+    const {username, password, password2} = req.body;
+
+    //check if match
+if(password !== password2) {
+  console.log("Passwords don't match");
+}
+
+//check if password is more than 6 characters
+if(password.length < 6 ) {
+  console.log("Passwords must be at least 6 characters");
+}
+
+    User.register({username: username}, password, function(err, user) {
+      if(err) {
+        console.log(err);
+        res.redirect("/register");
+      } else {
+        passport.authenticate("local")(req, res, function() {
+            res.redirect("/admin");
+        });
+      }
+    });
+   });
+*/
+
+ app.post("/login", function(req, res) {
     const user = new User({
       username: req.body.username,
       password: req.body.password
     });
-  
-    req.login(user, function(err){
-      if (err) {
+    req.login(user, function(err) {
+      if(err) {
         console.log(err);
       } else {
-        passport.authenticate("local")(req, res, function(){
+        passport.authenticate("local")(req, res, function() {
+          //res.render('admin',{
+            //user: req.user
+            
+            //});
+            //res.render('admin.ejs', { user: req.user })
           res.redirect("/admin");
-        });
+      });
       }
     });
-  
-  });
-  
+ });
+
   app.get("/posts/:postId", function(req, res) { //dynamic site with Node and Express
     
-    //const requestedPostId = _.lowerCase(req.params.postId);
     const requestedPostId = req.params.postId;
     
-    
-
     Post.findOne({_id: requestedPostId}, function(err, post){
         
-
         res.render("post", {
         title: post.title,
         content: post.content,
-        //content: tinymce.get("mytextarea").getContent({ format: "text" }).post.content,
-        username: post.username,
+        author: post.author,
         createdAt: post.createdAt
       });
     }); 
    
   });
-
-
-
 //app.use('/index', indexRouter);
 //app.use('/users', usersRouter);
 
-
-
 //module.exports = app;
+
 
 app.listen(3000, function() {
     console.log("Server started on port 3000");
   });
+ 
