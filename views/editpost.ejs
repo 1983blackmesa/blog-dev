@@ -1,0 +1,32 @@
+<%- include("partials/authheader") %>
+
+<h1>Compose</h1>
+
+
+<form class="" action="/compose" method="post">
+
+<table class="table">
+    <tr>
+        <th>Title</th>
+        <th>Author</th>
+        <th>Content</th>
+        <th>CreatedAt</th>
+    </tr>
+
+    <% for(var i=0; i<posts.length;i++) { %>
+    <tr>
+        <td><%= posts[i].title %></td>
+        <td><%= posts[i].author %></td>
+        <td><%- posts[i].content %></td>
+        <td><%= posts[i].createdAt %></td>
+        <td>
+            <a href="/editpostID/<%=posts[i]._id%>" class="btn btn-warning btn-sm">Edit</a>
+        </td>
+    </tr>
+<% } %>
+</table>
+</form>
+
+
+
+<%- include("partials/footer") %>
