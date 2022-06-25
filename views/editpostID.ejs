@@ -36,7 +36,7 @@ a {
 	/* bottom: 0; */
 	width: 100%;
 	height: 60px;
-	background-color: #1abc9c;
+	background-color:#00B7FF;
 }
 
 .footer p {
@@ -47,24 +47,26 @@ a {
 
 </style>
 
-<h1>Compose</h1>
+<h1>Edit Post</h1>
 
+<form class="" action="/do-edit-post/<%= id %>" method="post">
 
-<form class="" action="/do-edit-post" method="post">
-
-<div class="form-group">
-<label>Title</label>    
- <input class="form-control" text="text" name="postTitle" value="<%= title %>">
- <label>Author</label>
- <input class="form-control" text="text" name="postAuthor" value="<%= author %>">
- <label>Post</label> 
- <!-- Text area matching the selector specified in the TinyMCE configuration -->
- <textarea id="mytextarea" class="form-control" name="postBody" rows="5" cols="30" value=<%- content %>> </textarea>
-
-
-</div>
-
-<button class="btn btn-warning" type="submit" name="button">Save</button>
+  <div class="form-group">
+  <label>Title</label>
+  
+   <input class="form-control" text="text" name="postTitle" value="<%= title %>">
+   <label>Author</label>
+   <input class="form-control" text="text" name="postAuthor" value="<%= author %>">
+   <label>Post</label> 
+   <!-- Text area matching the selector specified in the TinyMCE configuration -->
+   <textarea id="mytextarea" class="form-control" name="postBody" rows="5" cols="30"><%- content %></textarea>
+  
+  
+  </div>
+  
+  <button class="btn btn-warning" type="submit" name="button">Save</button>
 </form>
+
+
 
 <%- include("partials/footer") %>
