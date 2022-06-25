@@ -1,9 +1,8 @@
 <%- include("partials/authheader") %>
 
-<h1>Compose</h1>
+<h1>Edit Changes</h1>
+<!-- LOAD ALL POSTS ON THIS PAGE-->
 
-
-<form class="" action="/compose" method="post">
 
 <table class="table">
     <tr>
@@ -22,11 +21,16 @@
         <td>
             <a href="/editpostID/<%=posts[i]._id%>" class="btn btn-warning btn-sm">Edit</a>
         </td>
+
+        <td>
+            <form class="" action="/postdelete/<%=posts[i]._id%>" method="post">
+            <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+            </form>
+        </td>
+        
     </tr>
 <% } %>
 </table>
-</form>
-
 
 
 <%- include("partials/footer") %>
