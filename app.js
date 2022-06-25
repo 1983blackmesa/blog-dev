@@ -15,7 +15,7 @@ const passport = require("passport");
 const passportLocalMongoose = require("passport-local-mongoose");
 const GoogleStrategy = require('passport-google-oauth20').Strategy;
 const findOrCreate = require('mongoose-findorcreate');
-
+const methodOverride = require("method-override");
 
 //var indexRouter = require('./routes/index');
 //var usersRouter = require('./routes/users');
@@ -47,6 +47,18 @@ mongoose.connect(URI, {
 //EJS
 app.set('view engine', 'ejs');
 
+//just added this
+app.use(bodyParser.urlencoded({
+        limit: '50mb',
+        parameterLimit: 100000,
+        extended: true
+}));
+
+//Just added this
+app.use(bodyParser.json({
+  limit: '50mb'
+}));
+
 app.use(bodyParser.urlencoded({extended: true}));
 
 app.use(session({
@@ -61,11 +73,10 @@ app.use(session({
   app.use(passport.session()); //This stays in app.js
 
 app.use(logger('dev'));
-app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
+
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
-//app.use(express.static("public"));
+//app.use(methodOverride("_method")); // override for put and delete requests from forms IF I PUT THIS BACK LOGOUT WONT WORK
 
 
 
@@ -298,42 +309,70 @@ else {
 });
 
 //save specfic post id after new change
-app.post("/do-edit-post", function(req, res) {
+app.post("/do-edit-post/:id", function (req, res) {
+  if (req.isAuthenticated()){
+	const requestedId = req.params.id;
 	console.log(req.body);
-  const requestedPostId = req.params.postId;
-  Post.updateOne(
-    {
-      _id: requestedPostId, $set: {
-        title: req.body.postTitle,
-        author: req.body.postAuthor,
-        conent: req.body.postBody
-      },
-      
-    });
-    res.render("editpost");
-  //Post.findOneAndUpdate({ _id: requestedPostId }, {$set:{content:post.content}}, { overwrite: true }, function(err) {
-    //if (err) return next(err);
-    //res.redirect("editpost");
+	const newTitle = req.body.postTitle;
+  const newAuthor = req.body.postAuthor;
+	const newContent = req.body.postBody;
+	
+
+	const query = { _id: requestedId };
+	Post.findOneAndUpdate(
+		{
+			_id: requestedId,
+		},
+		{
+			$set: {
+				title: newTitle, // Fields which we need to update
+				author: newAuthor,
+        content: newContent,
+			},
+		},
+		{
+			new: true, // option part ( new: true will provide you updated data in response ) new returns new data
+		},
+		(err, post) => {
+			if (!err) {
+				res.render("editpost", {
+					title: post.title,
+          author: post.author,
+					content: post.content,
+				});
+			}
+		}
+	);
+	res.redirect("/editpost");
+
+} //end if authenticated
+
+else {
+  res.redirect("/login");
+}
+
 });
-  
-  
-  //const id = req.params.id;
-  //req.params.id
-  
-  /*
-  Post.findOneAndUpdate({_id: requestedPostId}, function(res, post) {
-    {$set: {title: post.title}, {author: post.author}, {content: post.content}}
 
-    res.redirect("/editpost", {
-      title: post.title,
-      content: post.content,
-      author: post.author,
-      createdAt: post.createdAt
-    });
-
-  */
-//}); //end function
-
+//delete post by specific id
+app.post("/postdelete/:id", async (req, res) => {
+    if (req.isAuthenticated()){
+    const requestedId = req.params.id; 
+    Post.findByIdAndDelete(
+      {
+        _id: requestedId,
+      },
+      (err, post) => {
+        if (!err) {
+          res.redirect("/editpost");
+        }
+      }
+    );
+    
+  }
+  else {
+    res.redirect("/login");
+  }
+});
 
 /*
 app.get("/register", function(req, res) {
