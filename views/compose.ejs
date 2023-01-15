@@ -1,4 +1,4 @@
-<%- include("partials/header") %>
+<%- include("partials/authheader") %>
 
 <h1>Compose</h1>
 
@@ -8,11 +8,11 @@
 <div class="form-group">
 <label>Title</label>    
  <input class="form-control" text="text" name="postTitle">
- <label>Username</label>
- <input class="form-control" text="text" name="postUsername">
+ <label>Author</label>
+ <input class="form-control" text="text" name="postAuthor">
  <label>Post</label> 
  <!-- Text area matching the selector specified in the TinyMCE configuration -->
- <textarea id="mytextarea" class="form-control" name="postBody" rows="5" cols="30"></textarea>
+ <textarea id="file-picker" class="form-control" name="postBody" rows="5" cols="30"></textarea>
 
 
 </div>
