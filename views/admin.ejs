@@ -3,17 +3,42 @@
 <div class="jumbotron text-center">
   <div class="container">
     <i class="fas fa-key fa-6x"></i>
-    <h1 class="display-3">Welcome admin</h1>
+   
+<h1>Welcome Admin</h1>
 
-  
-    <hr>
-    <form action="/logout?_method=DELETE" method="POST">
-        <button type="submit">Log Out</button>
-    </form>
-    <a class="btn btn-dark btn-lg" href="/compose" role="button">Create New Blog</a>
-    <a class="btn btn-dark btn-lg" href="/editpost" role="button">Edit Admin Posts</a>
+    
+    <hr>  
     
   </div>
 </div>
+
+<body>
+  <table class="table">
+    <thead>
+      <tr>
+        <th scope="col">ID</th>
+        <th scope="col">UserName</th>
+        <th scope="col">Role</th>
+        
+      </tr>
+    </thead>
+    <tbody>
+    <% users.forEach(myuser => {%>
+        <tr>
+            <th scope="row"><%= myuser._id %></th>
+            <td><%= myuser.username %></td>
+            <td><%= myuser.role %></td>
+        </tr>
+    <%})%>
+    </tbody>
+  </table>
+  <a href="/logout" class="btn btn-secondary">Logout</a>
+  <!-- <form action="/logout?_method=DELETE" method="POST">
+    <button type="submit">Log Out</button>
+  </form> -->
+
+</body>
+
+
 
 <%- include('partials/footer') %>
