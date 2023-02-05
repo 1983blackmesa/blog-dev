@@ -19,7 +19,7 @@ var app = express();
 
 app.use(express.json())
 
-const PORT = 5000;
+//const PORT = 5000;
 
 app.set('view engine', 'ejs');
 
@@ -130,6 +130,11 @@ mongoose.connect(URI, {
 })
 
 
+
+const PORT = process.env.PORT || 5000
 app.listen(PORT, () => {
-    console.log('Server is running on port', PORT)
+  console.log('Server is running on port', PORT)
 })
+// app.listen(PORT, () => {
+//     console.log('Server is running on port', PORT)
+// })
