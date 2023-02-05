@@ -84,12 +84,17 @@ app.use('/tinymce', express.static(path.join(__dirname, 'node_modules', 'tinymce
   //     });
   //   }
   // ));
-  
+
+ // Create GET request
+app.get("/", (req, res) => {
+  res.send("Express on Vercel");
+}); 
+
 // Routes
 app.use('/', require('./routes/userRouter'));
 //app.use("/auth", checkAuthenticated, require("./middleware/auth")); //access middleware
 
-  app.get("/", (req, res) => res.render("home")); //NO AUTH REQUIRED
+  app.get("/home", (req, res) => res.render("home")); //NO AUTH REQUIRED
   app.get("/register", (req, res) => res.render("register"));
   app.get("/login", (req, res) => res.render("login"));
   app.get("/page/:page", (req, res) => res.render("home"));
