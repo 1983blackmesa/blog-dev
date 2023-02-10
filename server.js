@@ -90,11 +90,17 @@ app.use('/tinymce', express.static(path.join(__dirname, 'node_modules', 'tinymce
 //   res.send("Express on Vercel");
 // }); 
 
+app.get('/',function(req,res){
+  res.redirect('https://www.pushtoprod.dev');
+  //res.status(301).redirect("https://www.pushtoprod.dev");
+  //res.redirect('https://www.pushtoprod.dev');
+});
+
 // Routes
 app.use('/', require('./routes/userRouter'));
 //app.use("/auth", checkAuthenticated, require("./middleware/auth")); //access middleware
 
-  app.get("/", (req, res) => res.render("home")); //NO AUTH REQUIRED
+  //app.get("/", (req, res) => res.render("home")); //NO AUTH REQUIRED
   app.get("/register", (req, res) => res.render("register"));
   app.get("/login", (req, res) => res.render("login"));
   app.get("/page/:page", (req, res) => res.render("home"));
