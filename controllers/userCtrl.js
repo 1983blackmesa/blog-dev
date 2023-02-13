@@ -155,9 +155,19 @@ logout: async (req, res) => {
     }
     res.redirect('/login');
   });
+},
+
+searchBlog: async (req, res) => {
+  try {
+
+    const searchTerm = req.body.searchTerm;
+    const blog = await Post.find( { $text: { $search: searchTerm, $diacriticSensitive: true }} )
+    res.render('search', { title: 'Blog - Search', blog } );
+
+  } catch (err) {
+    res.satus(500).send({message: err.message || "Error" });
+  }
 }
-
-
 
 
 }

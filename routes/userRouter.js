@@ -13,6 +13,7 @@ router.get('/page/:page', userCtrl.page);
 router.get('/blogs', userCtrl.blogs);
 router.get('/about', userCtrl.about);
 router.get('/contact', userCtrl.contact);
+router.post('/search', userCtrl.searchBlog);
 
 router.get('/admin', checkAuthenticated, authCtrl.admin);
 router.post('/compose', checkAuthenticated, authCtrl.compose);

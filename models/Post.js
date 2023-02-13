@@ -19,5 +19,7 @@ const postSchema = new mongoose.Schema({
   },
 })
 
+postSchema.index({ title: 'text', content: 'text', author: 'text'});
+
 const Post = mongoose.model("Post", postSchema)
 module.exports = Post
